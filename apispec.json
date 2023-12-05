@@ -1,0 +1,721 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Perpus RESTful API",
+        "description": "API Spec for Category RESTful API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000/api"
+        }
+    ],
+    "paths": {
+        "/categories": {
+            "get": {
+                "tags": ["Kategori API"],
+                "description": "List all categories",
+                "summary": "Get All Categories",
+                "responses": {
+                    "200":{
+                        "description": "succsess get all data",
+                        "content": {
+                            "application/json": {
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items":{
+                                                "$ref": "#/components/schemas/Category"
+                                            }
+                                        }
+                                    }                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post":{
+                "tags": ["Kategori API"],
+                "description": "Create Category",
+                "summary": "Create Category",
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "nama":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "succsess create category",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref": "#/components/schemas/CategoryCreateUpdate"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories?page=1": {
+            "get": {
+                "tags": ["Kategori API"],
+                "description": "List pagination categories",
+                "summary": "Get pagination Categories",
+                "responses": {
+                    "200":{
+                        "description": "succsess get pagination data",
+                        "content": {
+                            "application/json": {
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items":{
+                                                "$ref": "#/components/schemas/Category"
+                                            }
+                                        }
+                                    }                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{categoryId}":{
+            "get":{
+                "description": "Get Category",
+                "summary": "Get Category",
+                "tags": ["Kategori API"],
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category Id",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "succsess get category",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref": "#/components/schemas/CategoryCreateUpdate"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put":{
+                "description": "Update Category",
+                "summary": "Update Category",
+                "tags": ["Kategori API"],
+                "parameters": [
+                    {
+                        "name": "kategoriId",
+                        "in": "path",
+                        "description": "Category Id",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }
+                    }
+                ],
+                "requestBody":{
+                    "description": "update category",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "nama":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "succsess update category",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref": "#/components/schemas/CategoryCreateUpdate"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "description": "Delete Category",
+                "summary": "Delete category",
+                "tags": ["Kategori API"],
+                "parameters": [
+                    {
+                        "name": "kategoriId",
+                        "description": "Category Id",
+                        "in": "path",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "succsess delete category",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "integer"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "object",
+                                            "properties": {
+                                                "nama":{
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/books":{
+            "post":{
+                "tags": ["Buku API"],
+                "description": "Create Book",
+                "summary": "Create new Book",
+                "requestBody":{
+                    "description": "Create new Book",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "$ref": "#/components/schemas/Buku"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "succsess create new Book",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/Buku"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/books?page=1": {
+            "get":{
+                "tags": ["Buku API"],
+                "description": "Get Pagination Book",
+                "summary": "Get Pagination Book",
+                "responses": {
+                    "200":{
+                        "description": "succsess get Pagination Book",      
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "array",
+                                            "items":{
+                                                "$ref": "#/components/schemas/Buku"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/books/{bookId}":{
+            "get":{
+                "tags": ["Buku API"],
+                "description": "Book Get",
+                "summary": "Get Book By Id",
+                "parameters": [
+                    {
+                        "description": "Get Book by Id",
+                        "in": "path",
+                        "name": "bookId",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }   
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "succsess get Book",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/Buku"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }        
+            },
+            "put":{
+                "tags": ["Buku API"],
+                "description": "Update Book",
+                "summary": "Update Book By Id",
+                "parameters": [
+                    {
+                        "description": "Get Book by Id",
+                        "in": "path",
+                        "name": "bookId",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }   
+                    }
+                ],
+                "requestBody":{
+                    "description": "Update Book",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "$ref": "#/components/schemas/Buku"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "succsess update",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/Buku"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags": ["Buku API"],
+                "description": "Delete Book",
+                "summary": "Delete Book By Id",
+                "parameters": [
+                    {
+                        "description": "Get Book by Id",
+                        "in": "path",
+                        "name": "bookId",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "succsess delete Book",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers":{
+            "get":{
+                "tags": ["Pemasok API"],
+                "description": "List all supplier",
+                "summary": "Get All supplier",
+                "responses": {
+                    "200":{
+                        "description": "succsess get all supplier",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "array",
+                                            "items":{
+                                                "$ref": "#/components/schemas/Pemasok"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post":{
+                "tags": ["Pemasok API"],
+                "description": "create supplier",
+                "summary": "Create supplier",
+                "requestBody":{
+                    "description": "Create New Data",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "$ref": "#/components/schemas/Pemasok"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "succsess update data",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/Pemasok"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers?page=1":{
+            "get":{
+                "tags": ["Pemasok API"],
+                "description": "List pagination supplier",
+                "summary": "Get pagination supplier",
+                "responses": {
+                    "200":{
+                        "description": "succsess get pagination supplier",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "array",
+                                            "items":{
+                                                "$ref": "#/components/schemas/Pemasok"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers/{supplierId}":{
+            "get":{
+                "tags": ["Pemasok API"],
+                "description": "Get supplier by Id",
+                "summary": "Get supplier by Id",
+                "parameters": [
+                    {
+                        "description": "get supplier by id",
+                        "in": "path",
+                        "name": "supplierId",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "succsess get supplier by id",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/Pemasok"
+                                        }
+                                    }
+                                }
+                            }       
+                        }
+                    }
+                }
+            },
+            "put":{
+                "tags": ["Pemasok API"],
+                "description": "Update supplier by Id",
+                "summary": "Update supplier by Id",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "supplierId",
+                        "description": "Get supplier Id",
+                        "schema":{
+                            "type": "number"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody":{
+                    "description": "update supplier",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "$ref": "#/components/schemas/Pemasok"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "succsess update supplier",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/Pemasok"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags": ["Pemasok API"],
+                "description": "Delete supplier by Id",
+                "summary": "Delete supplier by Id",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "supplierId",
+                        "description": "Delete supplier by Id",
+                        "required": true,
+                        "schema":{
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "succsess delete",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Category":{
+                "type": "object",
+                "properties": {
+                    "id":{
+                        "type": "integer"
+                    },
+                    "nama":{
+                        "type": "string"
+                    }
+                }
+            },
+            "CategoryCreateUpdate":{
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "number"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Category"
+                    }
+                }                
+            },
+            "Buku":{
+                "type": "object",
+                "properties": {
+                    "id":{
+                        "type": "integer"
+                    },
+                    "nama":{
+                        "type": "string"
+                    },
+                    "penerbit":{
+                        "type": "string"
+                    },
+                    "kategori":{
+                        "type": "integer"
+                    },
+                    "stok":{
+                        "type": "integer"
+                    }
+                }                
+            },
+            "Pemasok":{
+                "type": "object",
+                "properties": {
+                    "id":{
+                        "type": "integer"
+                    },
+                    "nama":{
+                        "type": "string"
+                    },
+                    "id_buku":{
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}
