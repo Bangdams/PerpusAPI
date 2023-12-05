@@ -41,9 +41,20 @@ func (controller *BookControllerImpl) Update(writer http.ResponseWriter, request
 	helper.ReadFromRequestBody(request, &bookUpdateRequest)
 
 	bookId := paramas.ByName("bookId")
-	id, err := strconv.Atoi(bookId)
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(bookId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
 	if err != nil {
-		panic(exception.NewNotIntType("DATA NOT INT"))
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
 	}
 
 	bookUpdateRequest.Id = int32(id)
@@ -63,8 +74,16 @@ func (controller *BookControllerImpl) Delete(writer http.ResponseWriter, request
 
 	// * Check if there are numbers in Qoury
 	checkNumber := strings.Split(bookId, "")
+	var idSlice []string
 
-	id, err := strconv.Atoi(checkNumber[0])
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
 	if err != nil {
 		panic(exception.NewNotFoundError("DATA NOT FOUND"))
 	}
@@ -83,8 +102,16 @@ func (controller *BookControllerImpl) FindById(writer http.ResponseWriter, reque
 
 	// * Check if there are numbers in Qoury
 	checkNumber := strings.Split(bookId, "")
+	var idSlice []string
 
-	id, err := strconv.Atoi(checkNumber[0])
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
 	if err != nil {
 		panic(exception.NewNotFoundError("DATA NOT FOUND"))
 	}
