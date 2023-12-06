@@ -79,8 +79,6 @@ func (service *BookServiceImpl) Update(ctx context.Context, request web.BookUpda
 
 	// Check request stock
 
-	// * Yang baru dikerjakan Tambah keterangan ketika mebuat buku baru dan tambah stok
-
 	// * Coba dam Cek deui dam ieu asa salah cara jalan anu lebih bagus deui jadi di refaktoring ken
 	if request.Stok != 0 {
 		if request.Stok > 0 {

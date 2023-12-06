@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"golang-api-ulang/exception"
 	"golang-api-ulang/helper"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/service"
@@ -40,8 +41,22 @@ func (controller *CategoryControllerImpl) Update(writer http.ResponseWriter, req
 	helper.ReadFromRequestBody(request, &categoryUpdateRequest)
 
 	categoryId := paramas.ByName("categoryId")
-	id, err := strconv.Atoi(categoryId)
-	helper.PanicIfError(err)
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(categoryId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
+	}
 
 	categoryUpdateRequest.Id = int32(id)
 
@@ -57,8 +72,22 @@ func (controller *CategoryControllerImpl) Update(writer http.ResponseWriter, req
 
 func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	categoryId := paramas.ByName("categoryId")
-	id, err := strconv.Atoi(categoryId)
-	helper.PanicIfError(err)
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(categoryId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
+	}
 
 	controller.CategoryService.Delete(request.Context(), int32(id))
 	webResponse := web.WebResponse{
@@ -71,8 +100,22 @@ func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, req
 
 func (controller *CategoryControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	categoryId := paramas.ByName("categoryId")
-	id, err := strconv.Atoi(categoryId)
-	helper.PanicIfError(err)
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(categoryId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
+	}
 
 	categoryResponse := controller.CategoryService.FindById(request.Context(), int32(id))
 

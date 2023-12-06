@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"golang-api-ulang/exception"
 	"golang-api-ulang/helper"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/service"
@@ -40,8 +41,22 @@ func (controller *SupplierControllerImpl) Update(writer http.ResponseWriter, req
 	helper.ReadFromRequestBody(request, &supplierUpdateRequest)
 
 	supplierId := paramas.ByName("supplierId")
-	id, err := strconv.Atoi(supplierId)
-	helper.PanicIfError(err)
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(supplierId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
+	}
 
 	supplierUpdateRequest.Id = int32(id)
 
@@ -57,8 +72,22 @@ func (controller *SupplierControllerImpl) Update(writer http.ResponseWriter, req
 
 func (controller *SupplierControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	supplierId := paramas.ByName("supplierId")
-	id, err := strconv.Atoi(supplierId)
-	helper.PanicIfError(err)
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(supplierId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
+	}
 
 	controller.SupplierService.Delete(request.Context(), int32(id))
 	webResponse := web.WebResponse{
@@ -71,8 +100,22 @@ func (controller *SupplierControllerImpl) Delete(writer http.ResponseWriter, req
 
 func (controller *SupplierControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	supplierId := paramas.ByName("supplierId")
-	id, err := strconv.Atoi(supplierId)
-	helper.PanicIfError(err)
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(supplierId, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	id, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		panic(exception.NewNotFoundError("DATA NOT FOUND"))
+	}
 
 	supplierResponse := controller.SupplierService.FindById(request.Context(), int32(id))
 	webResponse := web.WebResponse{

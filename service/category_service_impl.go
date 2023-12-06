@@ -8,6 +8,7 @@ import (
 	"golang-api-ulang/model/domain"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/repository"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -35,7 +36,7 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request web.Cate
 	defer helper.CommitOrRollback(tx)
 
 	category := domain.Category{
-		Nama: request.Nama,
+		Nama: strings.Trim(request.Nama, " "),
 	}
 	category = service.CategoryRepository.Save(ctx, tx, category)
 
@@ -55,7 +56,7 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	category.Nama = request.Nama
+	category.Nama = strings.Trim(request.Nama, " ")
 	category = service.CategoryRepository.Update(ctx, tx, category)
 
 	return helper.ToCategoryResponse(category)

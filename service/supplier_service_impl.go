@@ -8,6 +8,7 @@ import (
 	"golang-api-ulang/model/domain"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/repository"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -35,7 +36,7 @@ func (service *SupplierServiceImpl) Create(ctx context.Context, request web.Supp
 	defer helper.CommitOrRollback(tx)
 
 	supplier := domain.Supplier{
-		Nama: request.Nama,
+		Nama: strings.Trim(request.Nama, " "),
 	}
 
 	supplier = service.SupplierRepository.Save(ctx, tx, supplier)
@@ -56,7 +57,7 @@ func (service *SupplierServiceImpl) Update(ctx context.Context, request web.Supp
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	supplier.Nama = request.Nama
+	supplier.Nama = strings.Trim(request.Nama, " ")
 
 	supplier = service.SupplierRepository.Update(ctx, tx, supplier)
 
