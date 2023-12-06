@@ -99,13 +99,13 @@ func (service *SupplierServiceImpl) FindAll(ctx context.Context) []web.SupplierR
 	return helper.ToSupplierResponses(suppliers)
 }
 
-func (service *SupplierServiceImpl) Pagination(ctx context.Context, page int32) []web.SupplierResponse {
+func (service *SupplierServiceImpl) Pagination(ctx context.Context, page int32) ([]web.SupplierResponse, int32) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 
 	defer helper.CommitOrRollback(tx)
 
-	suppliers := service.SupplierRepository.Pagination(ctx, tx, page)
+	suppliers, currentPage := service.SupplierRepository.Pagination(ctx, tx, page)
 
-	return helper.ToSupplierResponses(suppliers)
+	return helper.ToSupplierResponses(suppliers), currentPage
 }

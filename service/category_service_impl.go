@@ -95,13 +95,13 @@ func (service *CategoryServiceImpl) FindAll(ctx context.Context) []web.CategoryR
 	return helper.ToCategoryResponses(categories)
 }
 
-func (service *CategoryServiceImpl) Pagination(ctx context.Context, page int32) []web.CategoryResponse {
+func (service *CategoryServiceImpl) Pagination(ctx context.Context, page int32) ([]web.CategoryResponse, int32) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 
 	defer helper.CommitOrRollback(tx)
 
-	categories := service.CategoryRepository.Pagination(ctx, tx, page)
+	categories, currentPage := service.CategoryRepository.Pagination(ctx, tx, page)
 
-	return helper.ToCategoryResponses(categories)
+	return helper.ToCategoryResponses(categories), currentPage
 }

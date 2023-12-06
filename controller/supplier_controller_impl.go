@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"golang-api-ulang/exception"
 	"golang-api-ulang/helper"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/service"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -96,30 +96,35 @@ func (controller *SupplierControllerImpl) FindAll(writer http.ResponseWriter, re
 }
 
 func (controller *SupplierControllerImpl) Pagination(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
-	var page int
-	var err error
-
 	pageRequest := request.URL.Query().Get("page")
 
-	// Check if pageRequest is null and url string is not /api/suppliers?whatever
-	if pageRequest == "" && request.URL.String() == "/api/suppliers" {
-		SupplierControler.FindAll(controller, writer, request, paramas)
-		return
-	} else {
-		page, err = strconv.Atoi(pageRequest)
-		if err != nil {
-			panic(exception.NewNotIntType(err.Error()))
-		}
-
+	// * Check if pageRequest is null
+	if pageRequest == "" {
 		pageRequest = "1"
 	}
 
-	supplierResponses := controller.SupplierService.Pagination(request.Context(), int32(page))
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(pageRequest, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+	page, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		page = 1
+	}
+
+	supplierResponses, currentPage := controller.SupplierService.Pagination(request.Context(), int32(page))
 
 	webResponse := web.WebResponse{
-		Code:   200,
-		Status: "OK",
-		Data:   supplierResponses,
+		Code:       200,
+		Status:     "OK",
+		Data:       supplierResponses,
+		Pagination: currentPage,
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)

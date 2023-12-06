@@ -11,5 +11,5 @@ type CategoryService interface {
 	Delete(ctx context.Context, categoryId int32)
 	FindById(ctx context.Context, categoryId int32) web.CategoryResponse
 	FindAll(ctx context.Context) []web.CategoryResponse
-	Pagination(ctx context.Context, page int32) []web.CategoryResponse
+	Pagination(ctx context.Context, page int32) ([]web.CategoryResponse, int32)
 }

@@ -81,7 +81,7 @@ func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 	return categories
 }
 
-func (repository *CategoryRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32) []domain.Category {
+func (repository *CategoryRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Category, int32) {
 	// get count
 	var count int
 	tx.QueryRow("select count(*) from kategori").Scan(&count)
@@ -117,5 +117,5 @@ func (repository *CategoryRepositoryImpl) Pagination(ctx context.Context, tx *sq
 		categories = append(categories, category)
 	}
 
-	return categories
+	return categories, currentPage
 }

@@ -80,7 +80,7 @@ func (repository *SupplierRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 	return suppliers
 }
 
-func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32) []domain.Supplier {
+func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Supplier, int32) {
 	// get count
 	var count int
 	tx.QueryRow("select count(*) from pemasok").Scan(&count)
@@ -95,6 +95,7 @@ func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sq
 	currentPage := page
 	if currentPage > int32(totalPages) {
 		offset = 0
+		currentPage = 1
 	} else {
 		offset = (currentPage - 1) * int32(pageSize)
 	}
@@ -115,5 +116,5 @@ func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sq
 		suppliers = append(suppliers, supplier)
 	}
 
-	return suppliers
+	return suppliers, currentPage
 }

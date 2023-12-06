@@ -12,5 +12,5 @@ type SupplierRepository interface {
 	Delete(ctx context.Context, tx *sql.Tx, supplier domain.Supplier)
 	FindById(ctx context.Context, tx *sql.Tx, supplierId int32) (domain.Supplier, error)
 	FindAll(ctx context.Context, tx *sql.Tx) []domain.Supplier
-	Pagination(ctx context.Context, tx *sql.Tx, page int32) []domain.Supplier
+	Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Supplier, int32)
 }
