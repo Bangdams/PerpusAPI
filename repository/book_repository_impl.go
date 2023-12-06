@@ -114,10 +114,6 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		offset = (currentPage - 1) * int32(pageSize)
 	}
 
-	// * improve code
-	// script := "select id, nama, penerbit, kategori, stok from buku limit ? offset ?"
-
-	// * to this
 	script := "select buku.id, buku.nama, buku.penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id order by buku.id limit ? offset ?"
 	rows, err := tx.QueryContext(ctx, script, pageSize, offset)
 	helper.PanicIfError(err)

@@ -137,8 +137,15 @@ func (controller *BookControllerImpl) Pagination(writer http.ResponseWriter, req
 
 	// * Check if there are numbers in Qoury
 	checkNumber := strings.Split(pageRequest, "")
+	var idSlice []string
 
-	page, err := strconv.Atoi(checkNumber[0])
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+	page, err := strconv.Atoi(strings.Join(idSlice, ""))
 	if err != nil {
 		page = 1
 	}

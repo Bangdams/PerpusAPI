@@ -96,6 +96,7 @@ func (repository *CategoryRepositoryImpl) Pagination(ctx context.Context, tx *sq
 	currentPage := page
 	if currentPage > int32(totalPages) {
 		offset = 0
+		currentPage = 1
 	} else {
 		offset = (currentPage - 1) * int32(pageSize)
 	}

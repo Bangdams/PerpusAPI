@@ -8,6 +8,7 @@ import (
 	"golang-api-ulang/model/domain"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/repository"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -36,8 +37,8 @@ func (service *BookServiceImpl) Create(ctx context.Context, request web.BookCrea
 	defer helper.CommitOrRollback(tx)
 
 	book := domain.Book{
-		Nama:     request.Nama,
-		Penerbit: request.Penerbit,
+		Nama:     strings.Trim(request.Nama, " "),
+		Penerbit: strings.Trim(request.Penerbit, " "),
 		Kategori: request.Kategori,
 		Stok:     request.Stok,
 	}
@@ -100,8 +101,8 @@ func (service *BookServiceImpl) Update(ctx context.Context, request web.BookUpda
 		err := service.Validate.Struct(request)
 		helper.PanicIfError(err)
 
-		book.Nama = request.Nama
-		book.Penerbit = request.Penerbit
+		book.Nama = strings.Trim(request.Nama, " ")
+		book.Penerbit = strings.Trim(request.Penerbit, " ")
 		book.Kategori = request.Kategori
 
 		book = service.BookRepository.Update(ctx, tx, book)
