@@ -8,7 +8,6 @@ import (
 	"golang-api-ulang/model/domain"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/repository"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -36,10 +35,16 @@ func (service *SupplierServiceImpl) Create(ctx context.Context, request web.Supp
 	defer helper.CommitOrRollback(tx)
 
 	supplier := domain.Supplier{
-		Nama: strings.Trim(request.Nama, " "),
+		Nama: request.Nama,
 	}
 
-	supplier = service.SupplierRepository.Save(ctx, tx, supplier)
+	// * Check if name is EXISTS in database
+	_, err = service.SupplierRepository.FindByName(ctx, tx, request.Nama)
+	if err != nil {
+		supplier = service.SupplierRepository.Save(ctx, tx, supplier)
+	} else {
+		panic(exception.NewDuplicateName("DATA IS EXISTS"))
+	}
 
 	return helper.ToSupplierResponse(supplier)
 }
@@ -57,9 +62,14 @@ func (service *SupplierServiceImpl) Update(ctx context.Context, request web.Supp
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	supplier.Nama = strings.Trim(request.Nama, " ")
-
-	supplier = service.SupplierRepository.Update(ctx, tx, supplier)
+	// * Check if name is EXISTS in database
+	_, err = service.SupplierRepository.FindByName(ctx, tx, request.Nama)
+	if err != nil {
+		supplier.Nama = request.Nama
+		supplier = service.SupplierRepository.Update(ctx, tx, supplier)
+	} else {
+		panic(exception.NewDuplicateName("DATA IS EXISTS"))
+	}
 
 	return helper.ToSupplierResponse(supplier)
 }

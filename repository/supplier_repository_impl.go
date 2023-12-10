@@ -60,6 +60,25 @@ func (repository *SupplierRepositoryImpl) FindById(ctx context.Context, tx *sql.
 	}
 }
 
+func (repository *SupplierRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Supplier, error) {
+	script := "select nama from pemasok where nama=?"
+	rows, err := tx.QueryContext(ctx, script, name)
+	helper.PanicIfError(err)
+
+	defer rows.Close()
+
+	supplier := domain.Supplier{}
+
+	if rows.Next() {
+		err := rows.Scan(&supplier.Nama)
+		helper.PanicIfError(err)
+
+		return supplier, nil
+	} else {
+		return supplier, errors.New("SUPPLIER NOT FOUND")
+	}
+}
+
 func (repository *SupplierRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Supplier {
 	script := "select id, nama from pemasok"
 	rows, err := tx.QueryContext(ctx, script)

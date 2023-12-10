@@ -25,6 +25,10 @@ func NewSupplierController(supplierService service.SupplierService) SupplierCont
 func (controller *SupplierControllerImpl) Create(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	supplierCreateRequest := web.SupplierCreateRequest{}
 	helper.ReadFromRequestBody(request, &supplierCreateRequest)
+
+	supplierCreateRequest.Nama = strings.Trim(supplierCreateRequest.Nama, " ")
+	supplierCreateRequest.Nama = strings.ToLower(supplierCreateRequest.Nama)
+
 	supplierResponse := controller.SupplierService.Create(request.Context(), supplierCreateRequest)
 
 	webResponse := web.WebResponse{
@@ -59,6 +63,8 @@ func (controller *SupplierControllerImpl) Update(writer http.ResponseWriter, req
 	}
 
 	supplierUpdateRequest.Id = int32(id)
+	supplierUpdateRequest.Nama = strings.Trim(supplierUpdateRequest.Nama, " ")
+	supplierUpdateRequest.Nama = strings.ToLower(supplierUpdateRequest.Nama)
 
 	supplierResponse := controller.SupplierService.Update(request.Context(), supplierUpdateRequest)
 	webResponse := web.WebResponse{
