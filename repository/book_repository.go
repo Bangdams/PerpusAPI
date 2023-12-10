@@ -13,6 +13,6 @@ type BookRepository interface {
 	UpdateStok(ctx context.Context, tx *sql.Tx, book domain.Book) domain.Book
 	Delete(ctx context.Context, tx *sql.Tx, book domain.Book)
 	FindById(ctx context.Context, tx *sql.Tx, bookId int32) (domain.Book, error)
-	FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Book, error)
+	FindByName(ctx context.Context, tx *sql.Tx, name string, method string) (domain.Book, error)
 	Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Book, int32)
 }

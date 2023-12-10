@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"golang-api-ulang/exception"
 	"golang-api-ulang/helper"
 	"golang-api-ulang/model/domain"
@@ -40,8 +39,8 @@ func (service *BookServiceImpl) Create(ctx context.Context, request web.BookCrea
 
 	historyS := domain.HistorySupplier{}
 
-	// Check if name is EXISTS in database
-	_, err = service.BookRepository.FindByName(ctx, tx, request.Nama)
+	//* Check if name is EXISTS in database
+	_, err = service.BookRepository.FindByName(ctx, tx, request.Nama, "create")
 	if err != nil {
 		book.Nama = request.Nama
 		book.IdPenerbit = request.IdPenerbit
@@ -99,14 +98,17 @@ func (service *BookServiceImpl) Update(ctx context.Context, request web.BookUpda
 		err := service.Validate.Struct(request)
 		helper.PanicIfError(err)
 
-		book.Nama = request.Nama
-		book.IdPenerbit = request.IdPenerbit
-		book.Kategori = request.Kategori
+		//* Check if name is EXISTS in database
+		body, err := service.BookRepository.FindByName(ctx, tx, request.Nama, "")
 
-		book = service.BookRepository.Update(ctx, tx, book)
-		book, err = service.BookRepository.FindById(ctx, tx, request.Id)
-		if err != nil {
-			panic(exception.NewNotFoundError("CATEGORY NOT FOUND"))
+		if err != nil || book.Nama == body.Nama {
+			book.Nama = request.Nama
+			book.IdPenerbit = request.IdPenerbit
+			book.Kategori = request.Kategori
+
+			book = service.BookRepository.Update(ctx, tx, book)
+		} else {
+			panic(exception.NewDuplicateName("DATA IS EXISTS"))
 		}
 	} else {
 		err := service.Validate.Struct(request)
@@ -145,14 +147,13 @@ func (service *BookServiceImpl) FindById(ctx context.Context, bookId int32) web.
 	return helper.ToBookResponse(book)
 }
 
-func (service *BookServiceImpl) FindByName(ctx context.Context, name string) web.BookResponse {
+func (service *BookServiceImpl) FindByName(ctx context.Context, name string, method string) web.BookResponse {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 
 	defer helper.CommitOrRollback(tx)
-	book, err := service.BookRepository.FindByName(ctx, tx, name)
+	book, err := service.BookRepository.FindByName(ctx, tx, name, method)
 	if err != nil {
-		fmt.Println("cek bro")
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 

@@ -29,13 +29,13 @@ func (controller *BookControllerImpl) Create(writer http.ResponseWriter, request
 	bookCreateRequest.Nama = strings.ToLower(bookCreateRequest.Nama)
 	bookCreateRequest.Nama = strings.Trim(bookCreateRequest.Nama, " ")
 
-	bookResponse := controller.BookService.Create(request.Context(), bookCreateRequest)
-	test := controller.BookService.FindByName(request.Context(), bookResponse.Nama)
+	book := controller.BookService.Create(request.Context(), bookCreateRequest)
+	bookResponse := controller.BookService.FindByName(request.Context(), book.Nama, "create")
 
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
-		Data:   test,
+		Data:   bookResponse,
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)
@@ -44,9 +44,6 @@ func (controller *BookControllerImpl) Create(writer http.ResponseWriter, request
 func (controller *BookControllerImpl) Update(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	bookUpdateRequest := web.BookUpdateRequest{}
 	helper.ReadFromRequestBody(request, &bookUpdateRequest)
-
-	bookUpdateRequest.Nama = strings.ToLower(bookUpdateRequest.Nama)
-	bookUpdateRequest.Nama = strings.Trim(bookUpdateRequest.Nama, " ")
 
 	bookId := paramas.ByName("bookId")
 	// * Check if there are numbers in Qoury
@@ -66,7 +63,12 @@ func (controller *BookControllerImpl) Update(writer http.ResponseWriter, request
 	}
 
 	bookUpdateRequest.Id = int32(id)
-	bookResponse := controller.BookService.Update(request.Context(), bookUpdateRequest)
+	bookUpdateRequest.Nama = strings.ToLower(bookUpdateRequest.Nama)
+	bookUpdateRequest.Nama = strings.Trim(bookUpdateRequest.Nama, " ")
+
+	book := controller.BookService.Update(request.Context(), bookUpdateRequest)
+	bookResponse := controller.BookService.FindByName(request.Context(), book.Nama, "")
+
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
