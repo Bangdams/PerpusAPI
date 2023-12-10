@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"golang-api-ulang/exception"
 	"golang-api-ulang/helper"
 	"golang-api-ulang/model/domain"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/repository"
-	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -36,26 +36,26 @@ func (service *BookServiceImpl) Create(ctx context.Context, request web.BookCrea
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	book := domain.Book{
-		Nama:     strings.Trim(request.Nama, " "),
-		Penerbit: strings.Trim(request.Penerbit, " "),
-		Kategori: request.Kategori,
-		Stok:     request.Stok,
-	}
+	book := domain.Book{}
 
-	historyS := domain.HistorySupplier{
-		IdPemasok: request.IdPemasok,
-		Stok:      book.Stok,
-	}
+	historyS := domain.HistorySupplier{}
 
 	// Check if name is EXISTS in database
-	_, err = service.BookRepository.FindByName(ctx, tx, book.Nama)
+	_, err = service.BookRepository.FindByName(ctx, tx, request.Nama)
 	if err != nil {
+		book.Nama = request.Nama
+		book.IdPenerbit = request.IdPenerbit
+		book.Kategori = request.Kategori
+		book.Stok = request.Stok
+
 		book = service.BookRepository.Save(ctx, tx, book)
 
+		historyS.IdPemasok = request.IdPemasok
+		historyS.Stok = book.Stok
 		historyS.IdBuku = book.Id
 		historyS.Date = time.Now().String()
 		historyS.Ket = "Buku Baru"
+
 		service.BookRepository.SaveHisSupp(ctx, tx, historyS)
 	} else {
 		panic(exception.NewDuplicateName("DATA IS EXISTS")) // todo Omeken deui dam cara jalan nu lain tong pake ieu
@@ -99,11 +99,15 @@ func (service *BookServiceImpl) Update(ctx context.Context, request web.BookUpda
 		err := service.Validate.Struct(request)
 		helper.PanicIfError(err)
 
-		book.Nama = strings.Trim(request.Nama, " ")
-		book.Penerbit = strings.Trim(request.Penerbit, " ")
+		book.Nama = request.Nama
+		book.IdPenerbit = request.IdPenerbit
 		book.Kategori = request.Kategori
 
 		book = service.BookRepository.Update(ctx, tx, book)
+		book, err = service.BookRepository.FindById(ctx, tx, request.Id)
+		if err != nil {
+			panic(exception.NewNotFoundError("CATEGORY NOT FOUND"))
+		}
 	} else {
 		err := service.Validate.Struct(request)
 		helper.PanicIfError(err)
@@ -146,9 +150,9 @@ func (service *BookServiceImpl) FindByName(ctx context.Context, name string) web
 	helper.PanicIfError(err)
 
 	defer helper.CommitOrRollback(tx)
-
 	book, err := service.BookRepository.FindByName(ctx, tx, name)
 	if err != nil {
+		fmt.Println("cek bro")
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 

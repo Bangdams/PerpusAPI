@@ -17,8 +17,8 @@ func NewBookRepository() BookRepository {
 
 func (repository *BookRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, book domain.Book) domain.Book {
 	// Save data table buku
-	script := "insert into buku(nama, penerbit, kategori, stok) values (?,?,?,?)"
-	result, err := tx.ExecContext(ctx, script, book.Nama, book.Penerbit, book.Kategori, book.Stok)
+	script := "insert into buku(nama, penerbit_id, kategori, stok) values (?,?,?,?)"
+	result, err := tx.ExecContext(ctx, script, book.Nama, book.IdPenerbit, book.Kategori, book.Stok)
 	helper.PanicIfError(err)
 
 	id, err := result.LastInsertId()
@@ -36,8 +36,8 @@ func (repository *BookRepositoryImpl) SaveHisSupp(ctx context.Context, tx *sql.T
 }
 
 func (repository *BookRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, book domain.Book) domain.Book {
-	script := "update buku set nama=?, penerbit=?, kategori=? where id=?"
-	_, err := tx.ExecContext(ctx, script, book.Nama, book.Penerbit, book.Kategori, book.Id)
+	script := "update buku set nama=?, penerbit_id=?, kategori=? where id=?"
+	_, err := tx.ExecContext(ctx, script, book.Nama, book.IdPenerbit, book.Kategori, book.Id)
 	helper.PanicIfError(err)
 	return book
 }
@@ -57,7 +57,7 @@ func (repository *BookRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, bo
 }
 
 func (repository *BookRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, bookId int32) (domain.Book, error) {
-	script := "select buku.id, buku.nama, buku.penerbit, kategori.nama as kategori, stok from buku join kategori on buku.kategori=kategori.id where buku.id=?"
+	script := "select buku.id, buku.nama, penerbit.nama, kategori.nama as kategori, stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.id=?"
 	rows, err := tx.QueryContext(ctx, script, bookId)
 	helper.PanicIfError(err)
 
@@ -76,7 +76,7 @@ func (repository *BookRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Book, error) {
-	script := "select id, nama from buku where nama=?"
+	script := "select buku.id, buku.nama, penerbit.nama, kategori.nama as kategori, stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama=?"
 	rows, err := tx.QueryContext(ctx, script, name)
 	helper.PanicIfError(err)
 
@@ -85,7 +85,7 @@ func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx
 	book := domain.Book{}
 
 	if rows.Next() {
-		err := rows.Scan(&book.Id, &book.Nama)
+		err := rows.Scan(&book.Id, &book.Nama, &book.Penerbit, &book.NamaKategori, &book.Stok)
 		helper.PanicIfError(err)
 
 		return book, nil
@@ -114,7 +114,7 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		offset = (currentPage - 1) * int32(pageSize)
 	}
 
-	script := "select buku.id, buku.nama, buku.penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id order by buku.id limit ? offset ?"
+	script := "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id order by buku.id limit ? offset ?"
 	rows, err := tx.QueryContext(ctx, script, pageSize, offset)
 	helper.PanicIfError(err)
 
