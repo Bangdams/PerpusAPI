@@ -63,8 +63,8 @@ func (service *SupplierServiceImpl) Update(ctx context.Context, request web.Supp
 	}
 
 	// * Check if name is EXISTS in database
-	_, err = service.SupplierRepository.FindByName(ctx, tx, request.Nama)
-	if err != nil {
+	body, err := service.SupplierRepository.FindByName(ctx, tx, request.Nama)
+	if err != nil || supplier.Nama == body.Nama {
 		supplier.Nama = request.Nama
 		supplier = service.SupplierRepository.Update(ctx, tx, supplier)
 	} else {

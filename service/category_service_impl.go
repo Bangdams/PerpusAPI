@@ -8,7 +8,6 @@ import (
 	"golang-api-ulang/model/domain"
 	"golang-api-ulang/model/web"
 	"golang-api-ulang/repository"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -28,7 +27,7 @@ func NewCategoryService(categoryRepository repository.CategoryRepository, DB *sq
 }
 
 func (service *CategoryServiceImpl) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
-	err := service.Validate.Struct(request.Nama)
+	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
 	tx, err := service.DB.Begin()
@@ -36,9 +35,16 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request web.Cate
 	defer helper.CommitOrRollback(tx)
 
 	category := domain.Category{
-		Nama: strings.Trim(request.Nama, " "),
+		Nama: request.Nama,
 	}
-	category = service.CategoryRepository.Save(ctx, tx, category)
+
+	// * Check if name is EXISTS in database
+	_, err = service.CategoryRepository.FindByName(ctx, tx, request.Nama)
+	if err != nil {
+		category = service.CategoryRepository.Save(ctx, tx, category)
+	} else {
+		panic(exception.NewDuplicateName("DATA IS EXISTS"))
+	}
 
 	return helper.ToCategoryResponse(category)
 }
@@ -56,8 +62,14 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	category.Nama = strings.Trim(request.Nama, " ")
-	category = service.CategoryRepository.Update(ctx, tx, category)
+	// * Check if name is EXISTS in database
+	body, err := service.CategoryRepository.FindByName(ctx, tx, request.Nama)
+	if err != nil || category.Nama == body.Nama {
+		category.Nama = request.Nama
+		category = service.CategoryRepository.Update(ctx, tx, category)
+	} else {
+		panic(exception.NewDuplicateName("DATA IS EXISTS"))
+	}
 
 	return helper.ToCategoryResponse(category)
 }

@@ -60,6 +60,25 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.
 	}
 }
 
+func (repository *CategoryRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Category, error) {
+	script := "select nama from kategori where nama=?"
+	rows, err := tx.QueryContext(ctx, script, name)
+	helper.PanicIfError(err)
+
+	defer rows.Close()
+
+	category := domain.Category{}
+
+	if rows.Next() {
+		err := rows.Scan(&category.Nama)
+		helper.PanicIfError(err)
+
+		return category, nil
+	} else {
+		return category, errors.New("CATEGORY NOT FOUND")
+	}
+}
+
 func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Category {
 	script := "select id, nama from kategori"
 	rows, err := tx.QueryContext(ctx, script)

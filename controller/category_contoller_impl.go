@@ -25,6 +25,10 @@ func NewCategoryController(categoryService service.CategoryService) CategoryCont
 func (controller *CategoryControllerImpl) Create(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	categoryCreateRequest := web.CategoryCreateRequest{}
 	helper.ReadFromRequestBody(request, &categoryCreateRequest)
+
+	categoryCreateRequest.Nama = strings.Trim(categoryCreateRequest.Nama, " ")
+	categoryCreateRequest.Nama = strings.ToLower(categoryCreateRequest.Nama)
+
 	categoryResponse := controller.CategoryService.Create(request.Context(), categoryCreateRequest)
 
 	webResponse := web.WebResponse{
@@ -59,6 +63,8 @@ func (controller *CategoryControllerImpl) Update(writer http.ResponseWriter, req
 	}
 
 	categoryUpdateRequest.Id = int32(id)
+	categoryUpdateRequest.Nama = strings.Trim(categoryUpdateRequest.Nama, " ")
+	categoryUpdateRequest.Nama = strings.ToLower(categoryUpdateRequest.Nama)
 
 	categoryResponse := controller.CategoryService.Update(request.Context(), categoryUpdateRequest)
 	webResponse := web.WebResponse{
