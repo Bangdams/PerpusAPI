@@ -30,7 +30,7 @@ func (controller *BookControllerImpl) Create(writer http.ResponseWriter, request
 	bookCreateRequest.Nama = strings.Trim(bookCreateRequest.Nama, " ")
 
 	book := controller.BookService.Create(request.Context(), bookCreateRequest)
-	bookResponse := controller.BookService.FindByName(request.Context(), book.Nama, "create")
+	bookResponse := controller.BookService.FindByName(request.Context(), book.Nama)
 
 	webResponse := web.WebResponse{
 		Code:   200,
@@ -67,7 +67,7 @@ func (controller *BookControllerImpl) Update(writer http.ResponseWriter, request
 	bookUpdateRequest.Nama = strings.Trim(bookUpdateRequest.Nama, " ")
 
 	book := controller.BookService.Update(request.Context(), bookUpdateRequest)
-	bookResponse := controller.BookService.FindByName(request.Context(), book.Nama, "")
+	bookResponse := controller.BookService.FindByName(request.Context(), book.Nama)
 
 	webResponse := web.WebResponse{
 		Code:   200,

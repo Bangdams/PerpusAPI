@@ -75,7 +75,7 @@ func (repository *BookRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, 
 	}
 }
 
-func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx, name string, method string) (domain.Book, error) {
+func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Book, error) {
 	script := "select buku.id, buku.nama, penerbit.nama, kategori.nama as kategori, stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama=?"
 	rows, err := tx.QueryContext(ctx, script, name)
 	helper.PanicIfError(err)
