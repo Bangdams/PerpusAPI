@@ -1,0 +1,5 @@
+CREATE TABLE penerbit (
+    id INT NOT NULL AUTO_INCREMENT,
+    nama VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB;

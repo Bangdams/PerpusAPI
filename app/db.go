@@ -8,6 +8,7 @@ import (
 
 func NewDB() *sql.DB {
 	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/sim-perpus")
+	// db, err := sql.Open("mysql", "root@tcp(localhost:3306)/coba")
 	helper.PanicIfError(err)
 
 	db.SetMaxIdleConns(10)
