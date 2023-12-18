@@ -94,11 +94,11 @@ func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx
 	}
 }
 
-func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Book, int32) {
+func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Book, int32) {
 	// get count
 	var count int
 	tx.QueryRow("select count(*) from buku").Scan(&count)
-	pageSize := 10
+	pageSize := 3
 	totalPages := count / pageSize
 	if count%pageSize != 0 {
 		totalPages++
@@ -114,8 +114,23 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		offset = (currentPage - 1) * int32(pageSize)
 	}
 
-	script := "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id order by buku.id limit ? offset ?"
-	rows, err := tx.QueryContext(ctx, script, pageSize, offset)
+	var name string
+	var script string
+	var rows *sql.Rows
+	var err error
+
+	// * Get Name Book By Query Parameter
+	getName := nameQuery
+	name = "%" + getName + "%"
+
+	if name != "%%" {
+		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama like ? order by buku.id limit ? offset ?"
+		rows, err = tx.QueryContext(ctx, script, name, pageSize, offset)
+	} else {
+		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id order by buku.id limit ? offset ?"
+		rows, err = tx.QueryContext(ctx, script, pageSize, offset)
+	}
+
 	helper.PanicIfError(err)
 
 	defer rows.Close()

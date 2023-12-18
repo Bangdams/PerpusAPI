@@ -138,6 +138,7 @@ func (controller *BookControllerImpl) FindById(writer http.ResponseWriter, reque
 
 func (controller *BookControllerImpl) Pagination(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	pageRequest := request.URL.Query().Get("page")
+	nameQuery := request.URL.Query().Get("name")
 
 	// * Check if pageRequest is null
 	if pageRequest == "" {
@@ -159,7 +160,7 @@ func (controller *BookControllerImpl) Pagination(writer http.ResponseWriter, req
 		page = 1
 	}
 
-	bookResponses, currentPage := controller.BookService.Pagination(request.Context(), int32(page))
+	bookResponses, currentPage := controller.BookService.Pagination(request.Context(), int32(page), nameQuery)
 
 	webResponse := web.WebResponse{
 		Code:       200,
