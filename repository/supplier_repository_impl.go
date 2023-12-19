@@ -100,25 +100,8 @@ func (repository *SupplierRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 }
 
 func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Supplier, int32) {
-	// get count
+	// * Global Variable
 	var count int
-	tx.QueryRow("select count(*) from pemasok").Scan(&count)
-	pageSize := 5
-	totalPages := count / pageSize
-	if count%pageSize != 0 {
-		totalPages++
-	}
-
-	// check if current page more then total page
-	var offset int32
-	currentPage := page
-	if currentPage > int32(totalPages) {
-		offset = 0
-		currentPage = 1
-	} else {
-		offset = (currentPage - 1) * int32(pageSize)
-	}
-
 	var name string
 	var script string
 	var rows *sql.Rows
@@ -128,6 +111,31 @@ func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sq
 	getName := nameQuery
 	name = "%" + getName + "%"
 
+	// * Get Count
+	if name != "%%" {
+		script = "select count(*) from pemasok where nama like ?"
+		tx.QueryRow(script, name).Scan(&count)
+	} else {
+		tx.QueryRow("select count(*) from pemasok").Scan(&count)
+	}
+
+	pageSize := 5
+	totalPages := count / pageSize
+	if count%pageSize != 0 {
+		totalPages++
+	}
+
+	// * check if current page more then total page
+	var offset int32
+	currentPage := page
+	if currentPage > int32(totalPages) {
+		offset = 0
+		currentPage = 1
+	} else {
+		offset = (currentPage - 1) * int32(pageSize)
+	}
+
+	// * Check if var name on nameQuery is %% or can call null
 	if name != "%%" {
 		script = "select id, nama from pemasok where nama like ? limit ? offset ?"
 		rows, err = tx.QueryContext(ctx, script, name, pageSize, offset)

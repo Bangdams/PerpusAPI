@@ -95,16 +95,33 @@ func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx
 }
 
 func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Book, int32) {
-	// get count
+	//* Global Variable
 	var count int
-	tx.QueryRow("select count(*) from buku").Scan(&count)
+	var name string
+	var script string
+	var rows *sql.Rows
+	var err error
+
+	//* Get Name Book By Query Parameter
+	getName := nameQuery
+	name = "%" + getName + "%"
+
+	//* Get Count
+	if name != "%%" {
+		script = "select count(*) from buku where nama like ?"
+		tx.QueryRow(script, name).Scan(&count)
+	} else {
+		tx.QueryRow("select count(*) from buku").Scan(&count)
+	}
+
+	//* Set Page Size and total Pages
 	pageSize := 3
 	totalPages := count / pageSize
 	if count%pageSize != 0 {
 		totalPages++
 	}
 
-	// check if current page more then total page
+	//* check if current page more then total page
 	var offset int32
 	currentPage := page
 	if currentPage > int32(totalPages) {
@@ -114,15 +131,7 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		offset = (currentPage - 1) * int32(pageSize)
 	}
 
-	var name string
-	var script string
-	var rows *sql.Rows
-	var err error
-
-	// * Get Name Book By Query Parameter
-	getName := nameQuery
-	name = "%" + getName + "%"
-
+	// * Check if var name on nameQuery is %% or can call null
 	if name != "%%" {
 		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama like ? order by buku.id limit ? offset ?"
 		rows, err = tx.QueryContext(ctx, script, name, pageSize, offset)
