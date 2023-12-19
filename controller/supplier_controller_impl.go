@@ -146,6 +146,7 @@ func (controller *SupplierControllerImpl) FindAll(writer http.ResponseWriter, re
 
 func (controller *SupplierControllerImpl) Pagination(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
 	pageRequest := request.URL.Query().Get("page")
+	nameQuery := request.URL.Query().Get("name")
 
 	// * Check if pageRequest is null
 	if pageRequest == "" {
@@ -167,7 +168,7 @@ func (controller *SupplierControllerImpl) Pagination(writer http.ResponseWriter,
 		page = 1
 	}
 
-	supplierResponses, currentPage := controller.SupplierService.Pagination(request.Context(), int32(page))
+	supplierResponses, currentPage := controller.SupplierService.Pagination(request.Context(), int32(page), nameQuery)
 
 	webResponse := web.WebResponse{
 		Code:       200,

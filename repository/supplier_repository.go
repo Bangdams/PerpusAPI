@@ -13,5 +13,5 @@ type SupplierRepository interface {
 	FindById(ctx context.Context, tx *sql.Tx, supplierId int32) (domain.Supplier, error)
 	FindAll(ctx context.Context, tx *sql.Tx) []domain.Supplier
 	FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Supplier, error)
-	Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Supplier, int32)
+	Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Supplier, int32)
 }

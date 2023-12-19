@@ -11,5 +11,5 @@ type SupplierService interface {
 	Delete(ctx context.Context, supplierId int32)
 	FindById(ctx context.Context, supplierId int32) web.SupplierResponse
 	FindAll(ctx context.Context) []web.SupplierResponse
-	Pagination(ctx context.Context, page int32) ([]web.SupplierResponse, int32)
+	Pagination(ctx context.Context, page int32, nameQuery string) ([]web.SupplierResponse, int32)
 }

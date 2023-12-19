@@ -99,7 +99,7 @@ func (repository *SupplierRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 	return suppliers
 }
 
-func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32) ([]domain.Supplier, int32) {
+func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Supplier, int32) {
 	// get count
 	var count int
 	tx.QueryRow("select count(*) from pemasok").Scan(&count)
@@ -119,8 +119,23 @@ func (repository *SupplierRepositoryImpl) Pagination(ctx context.Context, tx *sq
 		offset = (currentPage - 1) * int32(pageSize)
 	}
 
-	script := "select id, nama from pemasok limit ? offset ?"
-	rows, err := tx.QueryContext(ctx, script, pageSize, offset)
+	var name string
+	var script string
+	var rows *sql.Rows
+	var err error
+
+	// * Get Name Book By Query Parameter
+	getName := nameQuery
+	name = "%" + getName + "%"
+
+	if name != "%%" {
+		script = "select id, nama from pemasok where nama like ? limit ? offset ?"
+		rows, err = tx.QueryContext(ctx, script, name, pageSize, offset)
+	} else {
+		script := "select id, nama from pemasok limit ? offset ?"
+		rows, err = tx.QueryContext(ctx, script, pageSize, offset)
+	}
+
 	helper.PanicIfError(err)
 
 	defer rows.Close()
