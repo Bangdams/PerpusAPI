@@ -133,8 +133,8 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 
 	// * Check if var name on nameQuery is %% or can call null
 	if name != "%%" {
-		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama like ? order by buku.id limit ? offset ?"
-		rows, err = tx.QueryContext(ctx, script, name, pageSize, offset)
+		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama like ? or penerbit.nama like ? or kategori.nama like ? order by buku.id limit ? offset ?"
+		rows, err = tx.QueryContext(ctx, script, name, name, name, pageSize, offset)
 	} else {
 		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id order by buku.id limit ? offset ?"
 		rows, err = tx.QueryContext(ctx, script, pageSize, offset)
