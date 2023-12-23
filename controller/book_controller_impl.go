@@ -171,3 +171,45 @@ func (controller *BookControllerImpl) Pagination(writer http.ResponseWriter, req
 
 	helper.WriteToResponseBody(writer, webResponse)
 }
+
+func (controller *BookControllerImpl) ReportPagination(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params) {
+
+	//* Url Query
+	pageRequest := request.URL.Query().Get("page")
+	nameQuery := request.URL.Query().Get("name")
+	bookStatus := request.URL.Query().Get("status")
+	startDate := request.URL.Query().Get("date")
+	endDate := request.URL.Query().Get("end")
+
+	// * Check if pageRequest is null
+	if pageRequest == "" {
+		pageRequest = "1"
+	}
+
+	// * Check if there are numbers in Qoury
+	checkNumber := strings.Split(pageRequest, "")
+	var idSlice []string
+
+	for _, item := range checkNumber {
+		_, err := strconv.Atoi(item)
+		if err == nil {
+			idSlice = append(idSlice, item)
+		}
+	}
+
+	page, err := strconv.Atoi(strings.Join(idSlice, ""))
+	if err != nil {
+		page = 1
+	}
+
+	historyBookResponses, currentPage := controller.BookService.ReportPagination(request.Context(), int32(page), nameQuery, bookStatus, startDate, endDate)
+
+	webResponse := web.WebResponse{
+		Code:       200,
+		Status:     "OK",
+		Data:       historyBookResponses,
+		Pagination: currentPage,
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
+}

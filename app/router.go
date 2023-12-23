@@ -17,6 +17,9 @@ func NewRouter(bookController controller.BookController, supplierController cont
 	router.PUT("/api/books/:bookId", bookController.Update)
 	router.DELETE("/api/books/:bookId", bookController.Delete)
 
+	// Router History Books
+	router.GET("/api/report-books", bookController.ReportPagination)
+
 	// Router Suppliers
 	router.GET("/api/suppliers", supplierController.Pagination)
 	router.GET("/api/suppliers/:supplierId", supplierController.FindById)

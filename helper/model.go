@@ -26,6 +26,29 @@ func ToBookResponses(books []domain.Book) []web.BookResponse {
 	return bookResponses
 }
 
+// Respinse for history Book
+
+func ToBookHistoryResponse(historySupplier domain.HistorySupplier) web.BookHistoryResponse {
+	return web.BookHistoryResponse{
+		IdBuku:   historySupplier.IdBuku,
+		Nama:     historySupplier.NamaBuku,
+		Pemasok:  historySupplier.NamaPemasok,
+		Kategori: historySupplier.Kategori,
+		Stok:     historySupplier.Stok,
+		Tanggal:  historySupplier.Tanggal,
+		Ket:      historySupplier.Ket,
+	}
+}
+
+func ToBookHistoryResponses(hisSuppliers []domain.HistorySupplier) []web.BookHistoryResponse {
+	var bookHistoryResponses []web.BookHistoryResponse
+	for _, bookHistory := range hisSuppliers {
+		bookHistoryResponses = append(bookHistoryResponses, ToBookHistoryResponse(bookHistory))
+	}
+
+	return bookHistoryResponses
+}
+
 // Response For Category
 
 func ToCategoryResponse(category domain.Category) web.CategoryResponse {

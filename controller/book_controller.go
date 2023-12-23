@@ -12,4 +12,5 @@ type BookController interface {
 	Delete(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params)
 	FindById(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params)
 	Pagination(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params)
+	ReportPagination(writer http.ResponseWriter, request *http.Request, paramas httprouter.Params)
 }

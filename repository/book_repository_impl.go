@@ -31,7 +31,7 @@ func (repository *BookRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, book
 func (repository *BookRepositoryImpl) SaveHisSupp(ctx context.Context, tx *sql.Tx, historyS domain.HistorySupplier) {
 	// Save data table history_sup / pemasok
 	script := "insert into history_pemasok(id_pemasok, id_buku, stok, tanggal, ket) values(?,?,?,?,?)"
-	_, err := tx.ExecContext(ctx, script, historyS.IdPemasok, historyS.IdBuku, historyS.Stok, historyS.Date, historyS.Ket)
+	_, err := tx.ExecContext(ctx, script, historyS.IdPemasok, historyS.IdBuku, historyS.Stok, historyS.Tanggal, historyS.Ket)
 	helper.PanicIfError(err)
 }
 
@@ -121,7 +121,7 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		totalPages++
 	}
 
-	//* check if current page more then total page
+	//* Check if current page more then total page
 	var offset int32
 	currentPage := page
 	if currentPage > int32(totalPages) {
@@ -131,7 +131,7 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		offset = (currentPage - 1) * int32(pageSize)
 	}
 
-	// * Check if var name on nameQuery is %% or can call null
+	//* Check if var name on nameQuery is %% or can call null
 	if name != "%%" {
 		script = "select buku.id, buku.nama, penerbit.nama as penerbit, kategori.nama as kategori, buku.stok from buku join kategori on buku.kategori=kategori.id join penerbit on buku.penerbit_id=penerbit.id where buku.nama like ? or penerbit.nama like ? or kategori.nama like ? order by buku.id limit ? offset ?"
 		rows, err = tx.QueryContext(ctx, script, name, name, name, pageSize, offset)
@@ -155,4 +155,107 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 	}
 
 	return books, currentPage
+}
+
+func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]domain.HistorySupplier, int32) {
+	//* Global Variable
+	var count int
+	var name string
+	var script string
+	var rows *sql.Rows
+	var err error
+
+	//* Get Name Book By Query Parameter
+	getName := nameQuery
+	name = "%" + getName + "%"
+
+	// * Book status Default
+	if bookStatus != "Tambah Stok" && bookStatus != "Buku Baru" {
+		bookStatus = "Buku Baru"
+	}
+
+	//* Get Count
+	if name != "%%" {
+		script = "select count(*) from history_pemasok where ket = ?"
+		tx.QueryRow(script, bookStatus).Scan(&count)
+	} else {
+		script = "select count(*) from history_pemasok where ket = ?"
+		tx.QueryRow(script, bookStatus).Scan(&count)
+	}
+
+	//* Set Page Size and total Pages
+	pageSize := 3
+	totalPages := count / pageSize
+	if count%pageSize != 0 {
+		totalPages++
+	}
+
+	//* check if current page more then total page
+	var offset int32
+	currentPage := page
+	if currentPage > int32(totalPages) {
+		offset = 0
+		currentPage = 1
+	} else {
+		offset = (currentPage - 1) * int32(pageSize)
+	}
+
+	// * Check if var name on nameQuery is %% or can call if var is null
+	if name != "%%" {
+		script = "select buku.id, buku.nama as nama_buku, kategori.nama as kategori_buku, pemasok.nama as nama_pemasok, history_pemasok.tanggal, history_pemasok.stok, history_pemasok.ket from history_pemasok join buku on history_pemasok.id_buku=buku.id join kategori on buku.kategori=kategori.id join pemasok on history_pemasok.id_pemasok=pemasok.id where history_pemasok.ket=?"
+
+		scriptSercName := " and kategori.nama like ? or pemasok.nama like ?"
+
+		//* Check if startDate and endDate is not null or null on queryParameter
+		if startDate != "" && endDate != "" {
+			script += " and history_pemasok.tanggal >= ? and history_pemasok.tanggal <= ?"
+			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, endDate, name, name)
+		} else if startDate != "" {
+			script += " and history_pemasok.tanggal >= ?" + scriptSercName
+			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, name, name)
+		} else if endDate != "" {
+			script += " and history_pemasok.tanggal <= ?" + scriptSercName
+			rows, err = tx.QueryContext(ctx, script, bookStatus, endDate, name, name)
+		} else {
+			script += scriptSercName
+			rows, err = tx.QueryContext(ctx, script, bookStatus, name, name)
+		}
+
+	} else {
+		script = "select buku.id, buku.nama as nama_buku, kategori.nama, pemasok.nama as nama_pemasok, history_pemasok.tanggal, history_pemasok.stok, history_pemasok.ket from history_pemasok join buku on history_pemasok.id_buku=buku.id join kategori on buku.kategori=kategori.id join pemasok on history_pemasok.id_pemasok=pemasok.id where history_pemasok.ket=?"
+
+		// * page
+		limitOrder := " order by buku.nama limit ? offset ?"
+
+		//* Check if startDate and endDate is not null or null on queryParameter
+		if startDate != "" && endDate != "" {
+			script += " and history_pemasok.tanggal >= ? and history_pemasok.tanggal <= ?" + limitOrder
+			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, endDate, pageSize, offset)
+		} else if startDate != "" {
+			script += " and history_pemasok.tanggal >= ?" + limitOrder
+			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, pageSize, offset)
+		} else if endDate != "" {
+			script += " and history_pemasok.tanggal <= ?" + limitOrder
+			rows, err = tx.QueryContext(ctx, script, bookStatus, endDate, pageSize, offset)
+		} else {
+			script += limitOrder
+			rows, err = tx.QueryContext(ctx, script, bookStatus, pageSize, offset)
+		}
+	}
+
+	helper.PanicIfError(err)
+
+	defer rows.Close()
+
+	var hisSuppliers []domain.HistorySupplier
+
+	for rows.Next() {
+		hisSupplier := domain.HistorySupplier{}
+		err := rows.Scan(&hisSupplier.IdBuku, &hisSupplier.NamaBuku, &hisSupplier.Kategori, &hisSupplier.NamaPemasok, &hisSupplier.Tanggal, &hisSupplier.Stok, &hisSupplier.Ket)
+		helper.PanicIfError(err)
+
+		hisSuppliers = append(hisSuppliers, hisSupplier)
+	}
+
+	return hisSuppliers, currentPage
 }

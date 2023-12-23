@@ -52,7 +52,7 @@ func (service *BookServiceImpl) Create(ctx context.Context, request web.BookCrea
 		historyS.IdPemasok = request.IdPemasok
 		historyS.Stok = book.Stok
 		historyS.IdBuku = book.Id
-		historyS.Date = time.Now().String()
+		historyS.Tanggal = time.Now().String()
 		historyS.Ket = "Buku Baru"
 
 		service.BookRepository.SaveHisSupp(ctx, tx, historyS)
@@ -87,7 +87,7 @@ func (service *BookServiceImpl) Update(ctx context.Context, request web.BookUpda
 			historyS.IdPemasok = request.IdPemasok
 			historyS.IdBuku = book.Id
 			historyS.Stok = request.Stok
-			historyS.Date = time.Now().String()
+			historyS.Tanggal = time.Now().String()
 			historyS.Ket = "Tambah Stok"
 
 			service.BookRepository.SaveHisSupp(ctx, tx, historyS)
@@ -159,6 +159,7 @@ func (service *BookServiceImpl) FindByName(ctx context.Context, name string) web
 
 	return helper.ToBookResponse(book)
 }
+
 func (service *BookServiceImpl) Pagination(ctx context.Context, page int32, nameQuery string) ([]web.BookResponse, int32) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
@@ -168,4 +169,15 @@ func (service *BookServiceImpl) Pagination(ctx context.Context, page int32, name
 	books, currentPage := service.BookRepository.Pagination(ctx, tx, page, nameQuery)
 
 	return helper.ToBookResponses(books), currentPage
+}
+
+func (service *BookServiceImpl) ReportPagination(ctx context.Context, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]web.BookHistoryResponse, int32) {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+
+	defer helper.CommitOrRollback(tx)
+
+	historyBooks, currentPage := service.BookRepository.ReportPagination(ctx, tx, page, nameQuery, bookStatus, startDate, endDate)
+
+	return helper.ToBookHistoryResponses(historyBooks), currentPage
 }
