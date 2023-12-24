@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"golang-api-ulang/helper"
 	"golang-api-ulang/model/domain"
 )
@@ -157,13 +158,14 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 	return books, currentPage
 }
 
-func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]domain.HistorySupplier, int32) {
+func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]domain.HistorySupplier, int32, int32) {
 	//* Global Variable
 	var count int
 	var name string
 	var script string
 	var rows *sql.Rows
 	var err error
+	var params []interface{}
 
 	//* Get Name Book By Query Parameter
 	getName := nameQuery
@@ -176,11 +178,49 @@ func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *
 
 	//* Get Count
 	if name != "%%" {
-		script = "select count(*) from history_pemasok where ket = ?"
-		tx.QueryRow(script, bookStatus).Scan(&count)
+		script = "select count(*) from history_pemasok join buku on history_pemasok.id_buku=buku.id join kategori on buku.kategori=kategori.id join pemasok on history_pemasok.id_pemasok=pemasok.id where history_pemasok.ket=?"
+		dateFilter := " and history_pemasok.tanggal %s"
+
+		// * Set bookStatus in params
+		params = append(params, bookStatus)
+
+		//* Check if startDate and endDate is not null or null on queryParameter
+		if startDate != "" {
+			script += fmt.Sprintf(dateFilter, ">= ?")
+			params = append(params, startDate)
+		}
+
+		if endDate != "" {
+			script += fmt.Sprintf(dateFilter, "<= ?")
+			params = append(params, endDate)
+		}
+
+		// * Serach Filter fror name kategori or name supplier
+		searchFilter := " and (kategori.nama like ? or pemasok.nama like ?)"
+		params = append(params, name, name)
+
+		script += searchFilter
+
+		tx.QueryRow(script, params...).Scan(&count)
 	} else {
-		script = "select count(*) from history_pemasok where ket = ?"
-		tx.QueryRow(script, bookStatus).Scan(&count)
+		script = "select count(*) from history_pemasok where ket=?"
+		dateFilter := " and history_pemasok.tanggal %s"
+
+		// * Set bookStatus in params
+		params = append(params, bookStatus)
+
+		//* Check if startDate and endDate is not null or null on queryParameter
+		if startDate != "" {
+			script += fmt.Sprintf(dateFilter, ">= ?")
+			params = append(params, startDate)
+		}
+
+		if endDate != "" {
+			script += fmt.Sprintf(dateFilter, "<= ?")
+			params = append(params, endDate)
+		}
+
+		tx.QueryRow(script, params...).Scan(&count)
 	}
 
 	//* Set Page Size and total Pages
@@ -203,43 +243,47 @@ func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *
 	// * Check if var name on nameQuery is %% or can call if var is null
 	if name != "%%" {
 		script = "select buku.id, buku.nama as nama_buku, kategori.nama as kategori_buku, pemasok.nama as nama_pemasok, history_pemasok.tanggal, history_pemasok.stok, history_pemasok.ket from history_pemasok join buku on history_pemasok.id_buku=buku.id join kategori on buku.kategori=kategori.id join pemasok on history_pemasok.id_pemasok=pemasok.id where history_pemasok.ket=?"
-
-		scriptSercName := " and kategori.nama like ? or pemasok.nama like ?"
+		dateFilter := " and history_pemasok.tanggal %s"
+		limitPage := " order by buku.nama limit ? offset ?"
+		scriptSercName := " and (kategori.nama like ? or pemasok.nama like ?)"
 
 		//* Check if startDate and endDate is not null or null on queryParameter
-		if startDate != "" && endDate != "" {
-			script += " and history_pemasok.tanggal >= ? and history_pemasok.tanggal <= ?"
-			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, endDate, name, name)
-		} else if startDate != "" {
-			script += " and history_pemasok.tanggal >= ?" + scriptSercName
-			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, name, name)
-		} else if endDate != "" {
-			script += " and history_pemasok.tanggal <= ?" + scriptSercName
-			rows, err = tx.QueryContext(ctx, script, bookStatus, endDate, name, name)
-		} else {
-			script += scriptSercName
-			rows, err = tx.QueryContext(ctx, script, bookStatus, name, name)
+		if startDate != "" {
+			script += fmt.Sprintf(dateFilter, ">= ?")
 		}
 
+		if endDate != "" {
+			script += fmt.Sprintf(dateFilter, "<= ?")
+		}
+
+		script += scriptSercName
+
+		script += limitPage
+		params = append(params, pageSize, offset)
+
+		rows, err = tx.QueryContext(ctx, script, params...)
 	} else {
 		script = "select buku.id, buku.nama as nama_buku, kategori.nama, pemasok.nama as nama_pemasok, history_pemasok.tanggal, history_pemasok.stok, history_pemasok.ket from history_pemasok join buku on history_pemasok.id_buku=buku.id join kategori on buku.kategori=kategori.id join pemasok on history_pemasok.id_pemasok=pemasok.id where history_pemasok.ket=?"
 
-		// * page
-		limitOrder := " order by buku.nama limit ? offset ?"
+		// * Book Status
+		dateFilter := " and history_pemasok.tanggal %s"
+		limitPage := " order by buku.nama limit ? offset ?"
 
 		//* Check if startDate and endDate is not null or null on queryParameter
-		if startDate != "" && endDate != "" {
-			script += " and history_pemasok.tanggal >= ? and history_pemasok.tanggal <= ?" + limitOrder
-			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, endDate, pageSize, offset)
-		} else if startDate != "" {
-			script += " and history_pemasok.tanggal >= ?" + limitOrder
-			rows, err = tx.QueryContext(ctx, script, bookStatus, startDate, pageSize, offset)
-		} else if endDate != "" {
-			script += " and history_pemasok.tanggal <= ?" + limitOrder
-			rows, err = tx.QueryContext(ctx, script, bookStatus, endDate, pageSize, offset)
-		} else {
-			script += limitOrder
-			rows, err = tx.QueryContext(ctx, script, bookStatus, pageSize, offset)
+		if startDate != "" {
+			script += fmt.Sprintf(dateFilter, ">= ?")
+		}
+
+		if endDate != "" {
+			script += fmt.Sprintf(dateFilter, "<= ?")
+		}
+
+		script += limitPage
+		params = append(params, pageSize, offset)
+
+		rows, err = tx.QueryContext(ctx, script, params...)
+		if err != nil {
+			fmt.Println("error")
 		}
 	}
 
@@ -257,5 +301,5 @@ func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *
 		hisSuppliers = append(hisSuppliers, hisSupplier)
 	}
 
-	return hisSuppliers, currentPage
+	return hisSuppliers, currentPage, int32(totalPages)
 }

@@ -171,13 +171,13 @@ func (service *BookServiceImpl) Pagination(ctx context.Context, page int32, name
 	return helper.ToBookResponses(books), currentPage
 }
 
-func (service *BookServiceImpl) ReportPagination(ctx context.Context, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]web.BookHistoryResponse, int32) {
+func (service *BookServiceImpl) ReportPagination(ctx context.Context, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]web.BookHistoryResponse, int32, int32) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 
 	defer helper.CommitOrRollback(tx)
 
-	historyBooks, currentPage := service.BookRepository.ReportPagination(ctx, tx, page, nameQuery, bookStatus, startDate, endDate)
+	historyBooks, currentPage, totalPage := service.BookRepository.ReportPagination(ctx, tx, page, nameQuery, bookStatus, startDate, endDate)
 
-	return helper.ToBookHistoryResponses(historyBooks), currentPage
+	return helper.ToBookHistoryResponses(historyBooks), currentPage, totalPage
 }
