@@ -14,6 +14,6 @@ type BookRepository interface {
 	Delete(ctx context.Context, tx *sql.Tx, book domain.Book)
 	FindById(ctx context.Context, tx *sql.Tx, bookId int32) (domain.Book, error)
 	FindByName(ctx context.Context, tx *sql.Tx, name string) (domain.Book, error)
-	Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Book, int32)
+	Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Book, int32, int32)
 	ReportPagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]domain.HistorySupplier, int32, int32)
 }

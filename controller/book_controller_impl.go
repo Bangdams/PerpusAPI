@@ -160,13 +160,14 @@ func (controller *BookControllerImpl) Pagination(writer http.ResponseWriter, req
 		page = 1
 	}
 
-	bookResponses, currentPage := controller.BookService.Pagination(request.Context(), int32(page), nameQuery)
+	bookResponses, currentPage, totalPage := controller.BookService.Pagination(request.Context(), int32(page), nameQuery)
 
 	webResponse := web.WebResponse{
-		Code:       200,
-		Status:     "OK",
-		Data:       bookResponses,
-		Pagination: currentPage,
+		Code:            200,
+		Status:          "OK",
+		Data:            bookResponses,
+		Pagination:      currentPage,
+		TotalPagination: totalPage,
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)

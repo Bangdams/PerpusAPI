@@ -160,15 +160,15 @@ func (service *BookServiceImpl) FindByName(ctx context.Context, name string) web
 	return helper.ToBookResponse(book)
 }
 
-func (service *BookServiceImpl) Pagination(ctx context.Context, page int32, nameQuery string) ([]web.BookResponse, int32) {
+func (service *BookServiceImpl) Pagination(ctx context.Context, page int32, nameQuery string) ([]web.BookResponse, int32, int32) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 
 	defer helper.CommitOrRollback(tx)
 
-	books, currentPage := service.BookRepository.Pagination(ctx, tx, page, nameQuery)
+	books, currentPage, totalPage := service.BookRepository.Pagination(ctx, tx, page, nameQuery)
 
-	return helper.ToBookResponses(books), currentPage
+	return helper.ToBookResponses(books), currentPage, totalPage
 }
 
 func (service *BookServiceImpl) ReportPagination(ctx context.Context, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]web.BookHistoryResponse, int32, int32) {

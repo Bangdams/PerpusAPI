@@ -95,7 +95,7 @@ func (repository *BookRepositoryImpl) FindByName(ctx context.Context, tx *sql.Tx
 	}
 }
 
-func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Book, int32) {
+func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string) ([]domain.Book, int32, int32) {
 	//* Global Variable
 	var count int
 	var name string
@@ -125,7 +125,7 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 	//* Check if current page more then total page
 	var offset int32
 	currentPage := page
-	if currentPage > int32(totalPages) {
+	if currentPage > int32(totalPages) || currentPage <= 0 {
 		offset = 0
 		currentPage = 1
 	} else {
@@ -155,7 +155,7 @@ func (repository *BookRepositoryImpl) Pagination(ctx context.Context, tx *sql.Tx
 		books = append(books, book)
 	}
 
-	return books, currentPage
+	return books, currentPage, int32(totalPages)
 }
 
 func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *sql.Tx, page int32, nameQuery string, bookStatus string, startDate string, endDate string) ([]domain.HistorySupplier, int32, int32) {
@@ -233,7 +233,7 @@ func (repository *BookRepositoryImpl) ReportPagination(ctx context.Context, tx *
 	//* check if current page more then total page
 	var offset int32
 	currentPage := page
-	if currentPage > int32(totalPages) {
+	if currentPage > int32(totalPages) || currentPage <= 0 {
 		offset = 0
 		currentPage = 1
 	} else {

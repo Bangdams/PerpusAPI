@@ -113,7 +113,7 @@ func (repository *CategoryRepositoryImpl) Pagination(ctx context.Context, tx *sq
 	// check if current page more then total page
 	var offset int32
 	currentPage := page
-	if currentPage > int32(totalPages) {
+	if currentPage > int32(totalPages) || currentPage <= 0 {
 		offset = 0
 		currentPage = 1
 	} else {

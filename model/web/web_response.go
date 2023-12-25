@@ -4,6 +4,6 @@ type WebResponse struct {
 	Code            int         `json:"code"`
 	Status          string      `json:"status"`
 	Data            interface{} `json:"data"`
-	Pagination      int32       `json:"pagination"`
-	TotalPagination int32       `jason:"total_pagination"`
+	Pagination      int32       `json:"page"`
+	TotalPagination int32       `json:"total_page"`
 }
